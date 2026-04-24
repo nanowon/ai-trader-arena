@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+
+# Env
+.env
+.venv/
+venv/
+
+# Arena data
+data/arena.db
+data/cache/
+data/legacy/
+
+# Web build output
+web/*.html
+web/assets/data/
+
+# IDE
+.vscode/
+.idea/
+*.swp

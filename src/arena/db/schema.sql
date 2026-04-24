@@ -1,0 +1,1 @@
+-- Arena SQLite schema (Phase 2에서 작성 예정).

@@ -1,0 +1,17 @@
+name: Deploy Pages
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install package
+        run: pip install -e ".[dev]"
+      - name: Placeholder - static site build in Phase 3
+        run: echo "Phase 0 skeleton. Real deploy-pages in Phase 3."

@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-trader-arena"
+version = "0.1.0"
+description = "AI 주식 투자 에이전트 경쟁 플랫폼"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "nanowon" }]
+license = { text = "Proprietary" }
+dependencies = [
+    "pandas>=2.0",
+    "requests>=2.31",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+    "plotly>=5.18",
+    "jinja2>=3.1",
+    "yfinance>=0.2.40",
+    "pandas-market-calendars>=4.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.1",
+    "ruff>=0.4",
+]
+
+[project.scripts]
+arena = "arena.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

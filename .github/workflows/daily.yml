@@ -1,0 +1,21 @@
+name: Daily Arena Run
+
+on:
+  schedule:
+    - cron: '20 3 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install package
+        run: pip install -e ".[dev]"
+      - name: Run tests
+        run: pytest -q
+      - name: Placeholder - full pipeline in Phase 2+
+        run: echo "Phase 0 skeleton. Real run-daily in Phase 2."
