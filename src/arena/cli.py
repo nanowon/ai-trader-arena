@@ -17,6 +17,11 @@ logger = logging.getLogger("arena.cli")
 
 _PHASE_PENDING_MSG = "Not yet implemented"
 
+# scripts/ 패키지가 설치 경로에 없으므로 프로젝트 루트를 sys.path에 추가
+_PROJECT_ROOT = Path(__file__).parents[2]
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+
 
 def _not_implemented(name: str) -> int:
     logger.info("[%s] %s", name, _PHASE_PENDING_MSG)
