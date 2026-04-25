@@ -5,23 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Trader Arena Dashboard</title>
   <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: sans-serif; background: #f5f5f5; color: #222; padding: 16px; }
-    header { margin-bottom: 24px; }
-    header h1 { font-size: 1.5rem; }
-    header p { font-size: 0.85rem; color: #666; margin-top: 4px; }
-    .section { background: #fff; border-radius: 6px; padding: 16px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-    .section h2 { font-size: 1rem; margin-bottom: 12px; }
-    .caption { font-size: 0.75rem; color: #888; margin-top: 8px; }
-    .chart { width: 100%; height: 400px; }
-    .coming-soon { font-size: 1rem; color: #999; padding: 40px 0; text-align: center; }
-  </style>
+  <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
   <header>
     <h1>AI Trader Arena Dashboard</h1>
-    <p>Generated: 2026-04-25T07:15:56.935649+00:00</p>
+    <p>Generated: 2026-04-25T08:11:55.076938+00:00</p>
   </header>
 
   <div class="section">
@@ -67,13 +56,12 @@
 
   <div class="section">
     <h2>Chart 9: Weekly Review</h2>
-    <div id="chart-9">
-      <p class="coming-soon">Coming soon — weekly review data pending</p>
-    </div>
+    <div id="chart-9" class="chart-container"></div>
+    <p id="chart-9-note" class="note-text"></p>
   </div>
 
   <script>
-    const DATA = {"chart1": [], "chart2": [], "chart3": [], "chart4": [], "chart5": [], "chart6": [], "chart7": [], "chart8": [], "chart9": {"text": "Coming soon \u2014 weekly review data pending"}, "generated_at": "2026-04-25T07:15:56.935649+00:00"};
+    const DATA = {"chart1": [], "chart2": [], "chart3": [], "chart4": [], "chart5": [], "chart6": [], "chart7": [], "chart8": [], "chart9": {"note": "\ud788\uc2a4\ud1a0\ub9ac \uc5c6\uc74c", "rankings": [], "spy_return_pct": null, "today": "2026-04-25"}, "generated_at": "2026-04-25T08:11:55.076938+00:00"};
 
     // ── Chart 1: Equity Curve ─────────────────────────────────────────────────
     (function() {
@@ -232,7 +220,24 @@
       }], { margin: { t: 20 } });
     })();
 
-    // Chart 9: handled via Jinja template (plain text)
+    // chart9: weekly review
+    (function() {
+      const c9 = DATA.chart9 || {};
+      const note = document.getElementById('chart-9-note');
+      if (c9.note) note.textContent = c9.note;
+      const rankings = c9.rankings || [];
+      const rows = rankings.map((r, i) => [i + 1, r.agent, (r.return_pct != null ? (r.return_pct * 100).toFixed(2) + '%' : 'N/A')]);
+      if (c9.spy_return_pct != null) rows.push(['-', 'SPY (baseline)', (c9.spy_return_pct * 100).toFixed(2) + '%']);
+      if (rows.length > 0) {
+        Plotly.newPlot('chart-9', [{
+          type: 'table',
+          header: { values: ['Rank', 'Agent', 'Weekly Return'] },
+          cells: { values: [rows.map(r=>r[0]), rows.map(r=>r[1]), rows.map(r=>r[2])] }
+        }], { title: 'Weekly Review' });
+      } else {
+        document.getElementById('chart-9').textContent = 'No data';
+      }
+    })();
   </script>
 </body>
 </html>
