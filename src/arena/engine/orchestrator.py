@@ -243,6 +243,26 @@ def _run_inner(today: date | None, agents: list[AgentStrategy] | None) -> dict:
 		pf.fetch_current_closes(sorted(fetch_tickers)) if fetch_tickers else {}
 	)
 
+	# entry_price / hint_tag 컬럼 보정
+	# ai-stock-engine picks parquet에 가격 컬럼이 없을 수 있으므로,
+	# current_closes(yfinance 현재가)로 entry_price를 채우고
+	# hint_tag는 sector 컬럼에서 파생한다.
+	if core_df is not None and not core_df.empty:
+		core_df = core_df.copy()
+		if "entry_price" not in core_df.columns:
+			core_df["entry_price"] = core_df["ticker"].map(current_closes)
+			log.info(
+				"orchestrator: entry_price 컬럼 없음 → current_closes 주입 "
+				"(유효=%d/%d)",
+				core_df["entry_price"].notna().sum(), len(core_df),
+			)
+		if "hint_tag" not in core_df.columns:
+			core_df["hint_tag"] = (
+				core_df.get("sector", pd.Series([""] * len(core_df), index=core_df.index))
+				.fillna("")
+				.astype(str)
+			)
+
 	agent_exec_results: dict[str, dict] = {}
 
 	# 월요일에만 섹터 RS 계산 (etf_only 에이전트에 주입)

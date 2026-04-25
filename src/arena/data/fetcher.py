@@ -38,9 +38,20 @@ def _build_url(d: date) -> str:
 
 def _http_get(url: str, timeout: int) -> tuple[int, bytes]:
     headers: dict[str, str] = {}
-    gh_token = os.environ.get("GH_TOKEN")
+    gh_token = os.environ.get("GH_TOKEN", "").strip()
     if gh_token:
-        headers["Authorization"] = f"token {gh_token}"
+        try:
+            # HTTP 헤더는 latin-1 범위만 허용. 비ASCII 문자가 섞이면 encode 실패
+            gh_token.encode("latin-1")
+        except UnicodeEncodeError:
+            log.error(
+                "GH_TOKEN에 비ASCII 문자가 포함되어 있습니다. "
+                "토큰을 다시 확인하세요 (한글/특수문자 포함 금지). "
+                "Authorization 헤더 없이 요청을 시도합니다."
+            )
+            gh_token = ""
+        if gh_token:
+            headers["Authorization"] = f"token {gh_token}"
     resp = requests.get(url, headers=headers, timeout=timeout, allow_redirects=True)
     return resp.status_code, resp.content
 
