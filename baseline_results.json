@@ -1,0 +1,25 @@
+{
+  "version": 0,
+  "baseline_id": null,
+  "registered_at": null,
+  "git_sha": null,
+  "results": {
+    "sharpe": null,
+    "sharpe_ci_low": null,
+    "sharpe_ci_high": null,
+    "p_value": null,
+    "mdd": null,
+    "ann_return": null,
+    "win_rate": null,
+    "turnover": null,
+    "walkforward_positive_ratio": null
+  },
+  "config_hash": null,
+  "regime_breakdown": {
+    "bull": null,
+    "bear": null,
+    "choppy": null
+  },
+  "notes": "초기 placeholder. 첫 통과 EXP에서 quant-recorder가 갱신한다.",
+  "history": []
+}

@@ -71,6 +71,33 @@ CREATE TABLE IF NOT EXISTS benchmarks (
 
 _VERSION_1_SQL = SCHEMA_SQL
 
+_VERSION_2_SQL = """
+CREATE TABLE IF NOT EXISTS experiments (
+	exp_id              TEXT PRIMARY KEY,
+	project             TEXT NOT NULL,
+	title               TEXT,
+	registered_at       TEXT NOT NULL,
+	completed_at        TEXT,
+	git_sha             TEXT,
+	hypothesis          TEXT,
+	config_json         TEXT,
+	sharpe              REAL,
+	sharpe_ci_low       REAL,
+	sharpe_ci_high      REAL,
+	p_value             REAL,
+	mdd                 REAL,
+	ann_return          REAL,
+	win_rate            REAL,
+	turnover            REAL,
+	status              TEXT CHECK(status IN ('registered', 'running', 'pass', 'fail', 'abandoned')),
+	reviewer_verdict    TEXT,
+	notes               TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_experiments_project_status ON experiments (project, status);
+CREATE INDEX IF NOT EXISTS idx_experiments_registered_at ON experiments (registered_at);
+"""
+
 
 def run_migrations(conn: sqlite3.Connection) -> None:
 	"""schema_version을 읽고 필요한 마이그레이션을 멱등으로 적용한다."""
@@ -86,5 +113,12 @@ def run_migrations(conn: sqlite3.Connection) -> None:
 		conn.executescript(_VERSION_1_SQL)
 		conn.execute(
 			"INSERT OR REPLACE INTO schema_version (version) VALUES (1)"
+		)
+		conn.commit()
+
+	if current_version < 2:
+		conn.executescript(_VERSION_2_SQL)
+		conn.execute(
+			"INSERT OR REPLACE INTO schema_version (version) VALUES (2)"
 		)
 		conn.commit()
