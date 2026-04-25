@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Trader Arena Dashboard</title>
+  <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f5f5f5; color: #222; padding: 16px; }
+    header { margin-bottom: 24px; }
+    header h1 { font-size: 1.5rem; }
+    header p { font-size: 0.85rem; color: #666; margin-top: 4px; }
+    .section { background: #fff; border-radius: 6px; padding: 16px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .section h2 { font-size: 1rem; margin-bottom: 12px; }
+    .caption { font-size: 0.75rem; color: #888; margin-top: 8px; }
+    .chart { width: 100%; height: 400px; }
+    .coming-soon { font-size: 1rem; color: #999; padding: 40px 0; text-align: center; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>AI Trader Arena Dashboard</h1>
+    <p>Generated: 2026-04-25T07:15:56.935649+00:00</p>
+  </header>
+
+  <div class="section">
+    <h2>Chart 1: Equity Curve (Total Value by Agent)</h2>
+    <div id="chart-1" class="chart"></div>
+  </div>
+
+  <div class="section">
+    <h2>Chart 2: Latest Snapshot — Total Value per Agent</h2>
+    <div id="chart-2" class="chart"></div>
+  </div>
+
+  <div class="section">
+    <h2>Chart 3: Daily Return Distribution (%) by Agent</h2>
+    <div id="chart-3" class="chart"></div>
+  </div>
+
+  <div class="section">
+    <h2>Chart 4: Drawdown (%) by Agent</h2>
+    <div id="chart-4" class="chart"></div>
+  </div>
+
+  <div class="section">
+    <h2>Chart 5: All Positions</h2>
+    <p class="caption">(현재가 미반영 — est_value = qty × entry_price)</p>
+    <div id="chart-5" class="chart"></div>
+  </div>
+
+  <div class="section">
+    <h2>Chart 6: Recent Trades (last 50)</h2>
+    <div id="chart-6" class="chart"></div>
+  </div>
+
+  <div class="section">
+    <h2>Chart 7: Latest Factor Snapshots</h2>
+    <div id="chart-7" class="chart"></div>
+  </div>
+
+  <div class="section">
+    <h2>Chart 8: ETF-Only Agent Positions</h2>
+    <div id="chart-8" class="chart"></div>
+  </div>
+
+  <div class="section">
+    <h2>Chart 9: Weekly Review</h2>
+    <div id="chart-9">
+      <p class="coming-soon">Coming soon — weekly review data pending</p>
+    </div>
+  </div>
+
+  <script>
+    const DATA = {"chart1": [], "chart2": [], "chart3": [], "chart4": [], "chart5": [], "chart6": [], "chart7": [], "chart8": [], "chart9": {"text": "Coming soon \u2014 weekly review data pending"}, "generated_at": "2026-04-25T07:15:56.935649+00:00"};
+
+    // ── Chart 1: Equity Curve ─────────────────────────────────────────────────
+    (function() {
+      const rows = DATA.chart1 || [];
+      const agents = [...new Set(rows.map(r => r.agent))];
+      const traces = agents.map(agent => {
+        const filtered = rows.filter(r => r.agent === agent);
+        return {
+          type: 'scatter', mode: 'lines',
+          name: agent,
+          x: filtered.map(r => r.date),
+          y: filtered.map(r => r.total_value),
+        };
+      });
+      Plotly.newPlot('chart-1', traces, {
+        xaxis: { title: 'Date' },
+        yaxis: { title: 'Total Value (USD)' },
+        margin: { t: 20 },
+      });
+    })();
+
+    // ── Chart 2: Latest Total Value Bar ──────────────────────────────────────
+    (function() {
+      const rows = DATA.chart2 || [];
+      Plotly.newPlot('chart-2', [{
+        type: 'bar',
+        x: rows.map(r => r.agent),
+        y: rows.map(r => r.total_value),
+        text: rows.map(r => r.date),
+      }], {
+        xaxis: { title: 'Agent' },
+        yaxis: { title: 'Total Value (USD)' },
+        margin: { t: 20 },
+      });
+    })();
+
+    // ── Chart 3: Daily Return Box ─────────────────────────────────────────────
+    (function() {
+      const rows = DATA.chart3 || [];
+      const agents = [...new Set(rows.map(r => r.agent))];
+      const traces = agents.map(agent => ({
+        type: 'box',
+        name: agent,
+        y: rows.filter(r => r.agent === agent).map(r => r.daily_return),
+      }));
+      Plotly.newPlot('chart-3', traces, {
+        yaxis: { title: 'Daily Return (%)' },
+        margin: { t: 20 },
+      });
+    })();
+
+    // ── Chart 4: Drawdown Lines ───────────────────────────────────────────────
+    (function() {
+      const rows = DATA.chart4 || [];
+      const agents = [...new Set(rows.map(r => r.agent))];
+      const traces = agents.map(agent => {
+        const filtered = rows.filter(r => r.agent === agent);
+        return {
+          type: 'scatter', mode: 'lines',
+          name: agent,
+          x: filtered.map(r => r.date),
+          y: filtered.map(r => r.drawdown),
+        };
+      });
+      Plotly.newPlot('chart-4', traces, {
+        xaxis: { title: 'Date' },
+        yaxis: { title: 'Drawdown (%)' },
+        margin: { t: 20 },
+      });
+    })();
+
+    // ── Chart 5: All Positions Table ──────────────────────────────────────────
+    (function() {
+      const rows = DATA.chart5 || [];
+      if (rows.length === 0) {
+        Plotly.newPlot('chart-5', [], { annotations: [{ text: 'No positions', showarrow: false, font: { size: 14 } }], margin: { t: 20 } });
+        return;
+      }
+      Plotly.newPlot('chart-5', [{
+        type: 'table',
+        header: { values: ['Agent', 'Ticker', 'Qty', 'Entry Price', 'Est. Value *'] },
+        cells: {
+          values: [
+            rows.map(r => r.agent),
+            rows.map(r => r.ticker),
+            rows.map(r => r.qty),
+            rows.map(r => r.entry_price),
+            rows.map(r => r.est_value !== undefined ? r.est_value.toFixed(2) : ''),
+          ],
+        },
+      }], { margin: { t: 20 } });
+    })();
+
+    // ── Chart 6: Recent Trades Table ─────────────────────────────────────────
+    (function() {
+      const rows = DATA.chart6 || [];
+      if (rows.length === 0) {
+        Plotly.newPlot('chart-6', [], { annotations: [{ text: 'No trades', showarrow: false, font: { size: 14 } }], margin: { t: 20 } });
+        return;
+      }
+      Plotly.newPlot('chart-6', [{
+        type: 'table',
+        header: { values: ['Date', 'Agent', 'Ticker', 'Side', 'Qty', 'Price', 'Reason'] },
+        cells: {
+          values: [
+            rows.map(r => r.date),
+            rows.map(r => r.agent),
+            rows.map(r => r.ticker),
+            rows.map(r => r.side),
+            rows.map(r => r.qty),
+            rows.map(r => r.price),
+            rows.map(r => r.reason || ''),
+          ],
+        },
+      }], { margin: { t: 20 } });
+    })();
+
+    // ── Chart 7: Factor Snapshots Table ──────────────────────────────────────
+    (function() {
+      const rows = DATA.chart7 || [];
+      if (rows.length === 0) {
+        Plotly.newPlot('chart-7', [], { annotations: [{ text: 'No factor snapshots', showarrow: false, font: { size: 14 } }], margin: { t: 20 } });
+        return;
+      }
+      Plotly.newPlot('chart-7', [{
+        type: 'table',
+        header: { values: ['Ticker', 'Quality Pct', 'Date'] },
+        cells: {
+          values: [
+            rows.map(r => r.ticker),
+            rows.map(r => r.quality_pct !== undefined ? r.quality_pct : ''),
+            rows.map(r => r.date),
+          ],
+        },
+      }], { margin: { t: 20 } });
+    })();
+
+    // ── Chart 8: ETF-Only Positions Table ────────────────────────────────────
+    (function() {
+      const rows = DATA.chart8 || [];
+      if (rows.length === 0) {
+        Plotly.newPlot('chart-8', [], { annotations: [{ text: 'No ETF-only positions', showarrow: false, font: { size: 14 } }], margin: { t: 20 } });
+        return;
+      }
+      Plotly.newPlot('chart-8', [{
+        type: 'table',
+        header: { values: ['Ticker', 'Qty', 'Entry Price', 'Est. Value *'] },
+        cells: {
+          values: [
+            rows.map(r => r.ticker),
+            rows.map(r => r.qty),
+            rows.map(r => r.entry_price),
+            rows.map(r => r.est_value !== undefined ? r.est_value.toFixed(2) : ''),
+          ],
+        },
+      }], { margin: { t: 20 } });
+    })();
+
+    // Chart 9: handled via Jinja template (plain text)
+  </script>
+</body>
+</html>

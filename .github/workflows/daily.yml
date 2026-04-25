@@ -1,21 +1,49 @@
 name: Daily Arena Run
-
 on:
   schedule:
-    - cron: '20 3 * * 1-5'
+    - cron: '20 3 * * 1-5'  # 12:20 KST 평일
   workflow_dispatch:
+
+concurrency:
+  group: arena-daily
+  cancel-in-progress: false
+
+permissions:
+  contents: write
 
 jobs:
   run:
     runs-on: ubuntu-latest
+    env:
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      SMTP_HOST: ${{ secrets.SMTP_HOST }}
+      SMTP_PORT: ${{ secrets.SMTP_PORT }}
+      SMTP_USER: ${{ secrets.SMTP_USER }}
+      SMTP_PASS: ${{ secrets.SMTP_PASS }}
+      ARENA_EMAIL_FROM: ${{ secrets.ARENA_EMAIL_FROM }}
+      ARENA_EMAIL_TO: ${{ secrets.ARENA_EMAIL_TO }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      EDGAR_EMAIL: ${{ vars.EDGAR_EMAIL }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install package
-        run: pip install -e ".[dev]"
-      - name: Run tests
-        run: pytest -q
-      - name: Placeholder - full pipeline in Phase 2+
-        run: echo "Phase 0 skeleton. Real run-daily in Phase 2."
+          cache: 'pip'
+      - run: pip install -e ".[dev]"
+      - name: Run daily pipeline
+        run: arena run-daily --output run_output.json
+      - name: Build web
+        run: arena build-web
+      - name: Send notifications
+        run: arena notify --result run_output.json --all
+        continue-on-error: true
+      - name: Backup DB
+        run: arena backup
+      - name: Commit results
+        run: |
+          git config user.name "arena-bot"
+          git config user.email "arena-bot@noreply.github.com"
+          git add data/ docs/site/
+          git diff --cached --quiet || git commit -m "chore: daily arena update $(date -u +%Y-%m-%d)"
+          git push
